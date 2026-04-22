@@ -1,0 +1,85 @@
+<div class="pgn-input-container">
+  <h1>♟ Analyse de Partie d'Échecs</h1>
+  <p class="subtitle">Recherchez vos parties Chess.com ou collez un PGN manuellement</p>
+
+  <!-- Chess.com search -->
+  <div class="chesscom-section">
+    <h3>🔍 Rechercher un joueur Chess.com</h3>
+    <div class="search-row">
+      <mat-form-field appearance="outline" class="username-field">
+        <mat-label>Pseudo Chess.com</mat-label>
+        <input matInput [(ngModel)]="chesscomUsername" (keydown.enter)="searchGames()" placeholder="ex: Hamarkis">
+      </mat-form-field>
+      @if (isLoadingGames) {
+        <button mat-raised-button color="primary" disabled>
+          <mat-spinner diameter="20"></mat-spinner>
+        </button>
+      } @else {
+        <button mat-raised-button color="primary" (click)="searchGames()">
+          <mat-icon>search</mat-icon>
+          Chercher
+        </button>
+      }
+    </div>
+
+    @if (chesscomError) {
+      <p class="error-message">⚠️ {{ chesscomError }}</p>
+    }
+
+    @if (chesscomGames.length > 0) {
+      <div class="games-list">
+        @for (game of chesscomGames; track game.url) {
+          <div class="game-card" (click)="selectGame(game)"
+            [class.win]="chesscom.isWin(game, chesscomUsername)"
+            [class.loss]="!chesscom.isWin(game, chesscomUsername) && !chesscom.isDraw(game)"
+            [class.draw]="chesscom.isDraw(game)">
+            <div class="game-result-bar"></div>
+            <div class="game-info">
+              <div class="game-players">
+                <span class="opponent">vs {{ chesscom.getOpponent(game, chesscomUsername).name }}</span>
+                <span class="opponent-rating">({{ chesscom.getOpponent(game, chesscomUsername).rating }})</span>
+              </div>
+              <div class="game-meta">
+                <span class="time-class">{{ chesscom.getTimeClassLabel(game.timeClass) }}</span>
+                <span class="result-label">{{ chesscom.getResultLabel(game, chesscomUsername) }}</span>
+                <span class="game-date">{{ formatDate(game.endTime) }}</span>
+              </div>
+            </div>
+            <mat-icon class="play-icon">play_arrow</mat-icon>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <mat-divider class="section-divider"></mat-divider>
+
+  <!-- Manual PGN input -->
+  <div class="manual-section">
+    <h3>📋 Ou collez un PGN manuellement</h3>
+
+    <mat-form-field appearance="outline" class="pgn-field">
+      <mat-label>Collez votre PGN ici</mat-label>
+      <textarea
+        matInput
+        [(ngModel)]="pgnText"
+        rows="8"
+        placeholder="1. e4 e5 2. Nf3 Nc6 ..."
+      ></textarea>
+    </mat-form-field>
+
+    @if (errorMessage) {
+      <p class="error-message">⚠️ {{ errorMessage }}</p>
+    }
+
+    <div class="actions">
+      <button mat-raised-button color="primary" (click)="onSubmit()" class="analyze-btn">
+        <mat-icon>analytics</mat-icon>
+        Analyser
+      </button>
+      <button mat-stroked-button (click)="loadExample()" class="example-btn">
+        Charger un exemple
+      </button>
+    </div>
+  </div>
+</div>

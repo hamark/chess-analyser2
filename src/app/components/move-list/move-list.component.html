@@ -1,0 +1,60 @@
+<div class="move-list-container">
+  <div class="move-list-header">
+    <span class="col-num">#</span>
+    <span class="col-move">Blancs</span>
+    <span class="col-move">Noirs</span>
+  </div>
+  <div class="move-list-body">
+    @for (pair of movePairs; track pair.number) {
+      <div class="move-row">
+        <span class="col-num">{{ pair.number }}.</span>
+
+        @if (pair.white) {
+          <span
+            class="col-move move-cell"
+            [class.active]="isActive(pair.whiteIdx)"
+            [ngClass]="getRepertoireClass(pair.whiteIdx)"
+            (click)="selectMove(pair.whiteIdx)"
+          >
+            <span class="san">{{ pair.white.san }}</span>
+            @if (pair.white.quality) {
+              <span
+                class="quality-badge"
+                [ngClass]="getQualityClass(pair.white.quality)"
+                [title]="pair.white.quality"
+              >{{ getQualityIcon(pair.white.quality) }}</span>
+            }
+            @if (isUnknownRepertoire(pair.whiteIdx)) {
+              <span class="repertoire-add" title="Ajouter au répertoire" (click)="onAddToRepertoire($event, pair.whiteIdx)">+</span>
+            }
+          </span>
+        } @else {
+          <span class="col-move"></span>
+        }
+
+        @if (pair.black) {
+          <span
+            class="col-move move-cell"
+            [class.active]="isActive(pair.blackIdx)"
+            [ngClass]="getRepertoireClass(pair.blackIdx)"
+            (click)="selectMove(pair.blackIdx)"
+          >
+            <span class="san">{{ pair.black.san }}</span>
+            @if (pair.black.quality) {
+              <span
+                class="quality-badge"
+                [ngClass]="getQualityClass(pair.black.quality)"
+                [title]="pair.black.quality"
+              >{{ getQualityIcon(pair.black.quality) }}</span>
+            }
+            @if (isUnknownRepertoire(pair.blackIdx)) {
+              <span class="repertoire-add" title="Ajouter au répertoire" (click)="onAddToRepertoire($event, pair.blackIdx)">+</span>
+            }
+          </span>
+        } @else {
+          <span class="col-move"></span>
+        }
+      </div>
+    }
+  </div>
+</div>

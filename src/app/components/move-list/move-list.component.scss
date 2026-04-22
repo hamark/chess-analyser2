@@ -1,0 +1,152 @@
+.move-list-container {
+  background: #262522;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #3a3a3a;
+  height: min(640px, 85vw);
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.move-list-header {
+  display: flex;
+  padding: 8px 12px;
+  background: #1a1a1a;
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.move-list-body {
+  overflow-y: auto;
+  flex: 1;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #1a1a1a;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
+  }
+}
+
+.move-row {
+  display: flex;
+  padding: 4px 12px;
+  border-bottom: 1px solid #2a2a2a;
+
+  &:hover {
+    background: #2d2d2d;
+  }
+}
+
+.col-num {
+  width: 40px;
+  flex-shrink: 0;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.col-move {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #ddd;
+}
+
+.move-cell {
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #3a3a3a;
+  }
+
+  &.active {
+    background: #4a6a3a;
+    color: #fff;
+  }
+}
+
+.quality-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 3px;
+  line-height: 1;
+
+  &.brilliant {
+    color: #1baca6;
+    background: rgba(27, 172, 166, 0.15);
+  }
+  &.great {
+    color: #5c8bb0;
+    background: rgba(92, 139, 176, 0.15);
+  }
+  &.best {
+    color: #96bc4b;
+    background: rgba(150, 188, 75, 0.15);
+  }
+  &.good {
+    color: #96bc4b;
+  }
+  &.book {
+    color: #a88764;
+  }
+  &.inaccuracy {
+    color: #f7c631;
+    background: rgba(247, 198, 49, 0.15);
+  }
+  &.mistake {
+    color: #e58f2a;
+    background: rgba(229, 143, 42, 0.15);
+  }
+  &.blunder {
+    color: #ca3431;
+    background: rgba(202, 52, 49, 0.15);
+  }
+}
+
+// Repertoire status styles
+.move-cell.repertoire-match {
+  border-left: 3px solid #4caf50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.move-cell.repertoire-deviation {
+  border-left: 3px solid #f44336;
+  background: rgba(244, 67, 54, 0.1);
+}
+
+.move-cell.repertoire-unknown {
+  border-left: 3px solid transparent;
+}
+
+.repertoire-add {
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #888;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  padding: 0 4px;
+  margin-left: auto;
+  line-height: 1.2;
+  transition: color 0.15s, background 0.15s;
+
+  &:hover {
+    color: #4caf50;
+    background: rgba(76, 175, 80, 0.2);
+  }
+}

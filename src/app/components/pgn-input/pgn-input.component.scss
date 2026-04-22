@@ -1,0 +1,195 @@
+.pgn-input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  max-width: 750px;
+  margin: 0 auto;
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 0.25rem;
+    color: #e0e0e0;
+  }
+
+  .subtitle {
+    color: #999;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  h3 {
+    color: #ccc;
+    margin: 0 0 1rem;
+    font-size: 1.05rem;
+  }
+
+  .error-message {
+    color: #ca3431;
+    margin: 0.5rem 0;
+    font-weight: 500;
+  }
+}
+
+// Chess.com section
+.chesscom-section {
+  width: 100%;
+}
+
+.search-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+
+  .username-field {
+    flex: 1;
+  }
+
+  button {
+    height: 56px;
+    white-space: nowrap;
+  }
+}
+
+.games-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 0.75rem;
+  max-height: 420px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #1a1a1a;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
+  }
+}
+
+.game-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: #262522;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  border: 1px solid #333;
+
+  &:hover {
+    background: #333;
+    transform: translateX(3px);
+  }
+
+  .game-result-bar {
+    width: 4px;
+    height: 36px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  &.win .game-result-bar {
+    background: #96bc4b;
+  }
+
+  &.loss .game-result-bar {
+    background: #ca3431;
+  }
+
+  &.draw .game-result-bar {
+    background: #f7c631;
+  }
+
+  .game-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .game-players {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+
+    .opponent {
+      font-weight: 600;
+      color: #e0e0e0;
+      font-size: 0.95rem;
+    }
+
+    .opponent-rating {
+      color: #888;
+      font-size: 0.8rem;
+    }
+  }
+
+  .game-meta {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 2px;
+    font-size: 0.78rem;
+    color: #999;
+
+    .result-label {
+      font-weight: 500;
+    }
+  }
+
+  &.win .result-label {
+    color: #96bc4b;
+  }
+
+  &.loss .result-label {
+    color: #ca3431;
+  }
+
+  &.draw .result-label {
+    color: #f7c631;
+  }
+
+  .play-icon {
+    color: #666;
+    flex-shrink: 0;
+  }
+
+  &:hover .play-icon {
+    color: #96bc4b;
+  }
+}
+
+// Divider
+.section-divider {
+  width: 100%;
+  margin: 2rem 0;
+}
+
+// Manual PGN section
+.manual-section {
+  width: 100%;
+
+  .pgn-field {
+    width: 100%;
+
+    textarea {
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+  }
+
+  .actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+
+    .analyze-btn {
+      font-size: 1.05rem;
+      padding: 0.5rem 2rem;
+    }
+  }
+}

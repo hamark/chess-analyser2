@@ -1,0 +1,61 @@
+<div class="board-container">
+  <div class="board">
+    @for (row of squares; track $index; let rankIdx = $index) {
+      @for (square of row; track square.algebraic; let fileIdx = $index) {
+        <div class="square" [ngClass]="getSquareClass(square)">
+          @if (square.piece) {
+            <span class="piece" [class.black-piece]="square.isBlackPiece" [class.white-piece]="!square.isBlackPiece">{{ square.piece }}</span>
+          }
+          @if (fileIdx === 0) {
+            <span class="rank-label">{{ rankLabels[rankIdx] }}</span>
+          }
+          @if (rankIdx === 7) {
+            <span class="file-label">{{ fileLabels[fileIdx] }}</span>
+          }
+        </div>
+      }
+    }
+
+    <!-- Best move arrow overlay -->
+    <svg class="arrow-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+      @if (arrowFrom && arrowTo) {
+        <defs>
+          <marker id="arrowhead" markerWidth="3" markerHeight="2.5" refX="2.5" refY="1.25" orient="auto">
+            <polygon points="0 0, 3 1.25, 0 2.5" fill="#5ba35b" />
+          </marker>
+        </defs>
+        <line
+          [attr.x1]="arrowFrom.x"
+          [attr.y1]="arrowFrom.y"
+          [attr.x2]="arrowTo.x"
+          [attr.y2]="arrowTo.y"
+          stroke="#5ba35b"
+          stroke-width="2.2"
+          stroke-opacity="0.85"
+          stroke-linecap="round"
+          marker-end="url(#arrowhead)"
+        />
+      }
+      @if (qualityBadge && qualityBadgeCoords) {
+        <circle
+          [attr.cx]="qualityBadgeCoords.x"
+          [attr.cy]="qualityBadgeCoords.y"
+          r="3.8"
+          [attr.fill]="qualityBadge.color"
+          stroke="#1a1a1a"
+          stroke-width="0.5"
+        />
+        <text
+          [attr.x]="qualityBadgeCoords.x"
+          [attr.y]="qualityBadgeCoords.y"
+          text-anchor="middle"
+          dominant-baseline="central"
+          fill="white"
+          font-size="4"
+          font-weight="700"
+          font-family="sans-serif"
+        >{{ qualityBadge.symbol }}</text>
+      }
+    </svg>
+  </div>
+</div>

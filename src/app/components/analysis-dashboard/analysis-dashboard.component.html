@@ -1,0 +1,120 @@
+@if (showInput) {
+  <app-pgn-input (pgnSubmitted)="onPgnSubmitted($event)"></app-pgn-input>
+} @else {
+  <div class="dashboard">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <button mat-icon-button (click)="goBackToInput()" title="Retour">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="game-info">
+        <h2>{{ gameTitle }}</h2>
+        <p class="game-subtitle">{{ gameSubtitle }}</p>
+      </div>
+      @if (!isAnalyzing && moves.length > 0) {
+        <button mat-raised-button color="primary" (click)="generateReport()" class="report-btn" title="Copier le rapport de coaching">
+          <mat-icon>content_copy</mat-icon>
+          Rapport coaching
+        </button>
+      }
+    </div>
+
+    <!-- Progress bar during analysis -->
+    @if (isAnalyzing) {
+      <div class="analysis-progress">
+        <mat-progress-bar mode="determinate" [value]="analysisProgress"></mat-progress-bar>
+        <span class="progress-text">Analyse en cours... {{ analysisProgress | number:'1.0-0' }}%</span>
+      </div>
+    }
+
+    <!-- Main content -->
+    <div class="dashboard-content">
+      <!-- Eval bar -->
+      <app-eval-bar
+        [cp]="currentEval?.cp ?? null"
+        [mate]="currentEval?.mate ?? null"
+      ></app-eval-bar>
+
+      <!-- Chess board -->
+      <div class="board-section">
+        <app-chess-board
+          [fen]="currentFen"
+          [lastMoveFrom]="lastMoveFrom"
+          [lastMoveTo]="lastMoveTo"
+          [bestMoveUci]="bestMoveUci"
+          [moveQuality]="currentMoveQuality"
+        ></app-chess-board>
+
+        <!-- Move quality indicator -->
+        @if (currentMoveQualityInfo) {
+          <div class="move-quality-indicator" [style.background]="currentMoveQualityInfo.color">
+            <span class="quality-symbol">{{ currentMoveQualityInfo.symbol }}</span>
+            <span class="quality-label">{{ currentMoveQualityInfo.label }}</span>
+          </div>
+        }
+
+        <!-- Navigation buttons -->
+        <div class="navigation">
+          <button mat-icon-button (click)="goToStart()" [disabled]="currentMoveIndex <= -1" title="Début (Home)">
+            <mat-icon>skip_previous</mat-icon>
+          </button>
+          <button mat-icon-button (click)="previousMove()" [disabled]="currentMoveIndex <= -1" title="Coup précédent (←)">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <span class="move-counter">
+            {{ currentMoveIndex + 1 }} / {{ moves.length }}
+          </span>
+          <button mat-icon-button (click)="nextMove()" [disabled]="currentMoveIndex >= moves.length - 1" title="Coup suivant (→)">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <button mat-icon-button (click)="goToEnd()" [disabled]="currentMoveIndex >= moves.length - 1" title="Fin (End)">
+            <mat-icon>skip_next</mat-icon>
+          </button>
+
+          @if (!isAnalyzing && currentMoveIndex >= 0) {
+            <span class="nav-separator"></span>
+            <button mat-icon-button (click)="generatePositionAnalysis()" title="Analyser cette position (copier prompt LLM)" class="position-analysis-btn">
+              <mat-icon>psychology</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Move list -->
+      <app-move-list
+        [moves]="moves"
+        [currentMoveIndex]="currentMoveIndex"
+        [repertoireStatuses]="repertoireStatuses"
+        (moveSelected)="onMoveSelected($event)"
+        (addToRepertoire)="onAddToRepertoire($event)"
+      ></app-move-list>
+    </div>
+
+    <!-- Current move detail -->
+    @if (currentMoveIndex >= 0 && moves[currentMoveIndex]) {
+      <div class="move-detail">
+        <div class="detail-card">
+          <strong>Coup :</strong> {{ moves[currentMoveIndex].san }}
+          @if (moves[currentMoveIndex].evalAfter; as evalData) {
+            <span class="eval-score">
+              | Éval :
+              @if (evalData.mate !== null) {
+                M{{ evalData.mate }}
+              } @else if (evalData.cp !== null) {
+                {{ evalData.cp > 0 ? '+' : '' }}{{ (evalData.cp / 100).toFixed(1) }}
+              }
+            </span>
+          }
+          @if (moves[currentMoveIndex].cpLoss !== null) {
+            <span class="cp-loss">
+              | Perte : {{ (moves[currentMoveIndex].cpLoss! / 100).toFixed(2) }}
+            </span>
+          }
+          @if (moves[currentMoveIndex].evalBefore?.bestMove; as bestMove) {
+            <span class="best-move">| Meilleur coup : {{ bestMove }}</span>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}

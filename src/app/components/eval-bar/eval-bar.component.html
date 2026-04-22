@@ -1,0 +1,14 @@
+<div class="eval-bar">
+  <div class="bar">
+    <div class="white-section" [style.height.%]="whitePercentage">
+      @if (isWhiteAdvantage) {
+        <span class="eval-text white-text">{{ displayText }}</span>
+      }
+    </div>
+    <div class="black-section" [style.height.%]="100 - whitePercentage">
+      @if (!isWhiteAdvantage) {
+        <span class="eval-text black-text">{{ displayText }}</span>
+      }
+    </div>
+  </div>
+</div>
