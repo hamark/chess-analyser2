@@ -69,26 +69,7 @@ export class RepertoireService {
 
     const games = this.splitPgnGames(pgn);
     for (const gamePgn of games) {
-      const chess = new Chess();
-      try {
-        chess.loadPgn(gamePgn);
-      } catch {
-        continue;
-      }
-
-      const history = chess.history();
-      const replay = new Chess();
-      for (const san of history) {
-        const turn = replay.turn();
-        if (turn === color) {
-          const key = this.normalizeFen(replay.fen());
-          if (!data[key]) {
-            data[key] = san;
-            count++;
-          }
-        }
-        replay.move(san);
-      }
+      count += this.importGameWithVariations(gamePgn, color, data);
     }
 
     if (count > 0) {
@@ -118,6 +99,99 @@ export class RepertoireService {
   private splitPgnGames(pgn: string): string[] {
     const parts = pgn.split(/\n(?=\[Event\s)/);
     return parts.map(p => p.trim()).filter(p => p.length > 0);
+  }
+
+  private importGameWithVariations(pgn: string, color: 'w' | 'b', data: RepertoireData): number {
+    const moveText = pgn.replace(/\[[^\]]*\]/g, '').trim();
+    const tokens = this.tokenizePgn(moveText);
+
+    let count = 0;
+    const chess = new Chess();
+    const stack: string[] = [];
+
+    for (const token of tokens) {
+      if (token === '(') {
+        // Save current position, rewind to branch point
+        stack.push(chess.fen());
+        chess.undo();
+      } else if (token === ')') {
+        if (stack.length > 0) {
+          chess.load(stack.pop()!);
+        }
+      } else {
+        const turn = chess.turn();
+        const fenBefore = chess.fen();
+        try {
+          const move = chess.move(token);
+          if (move && turn === color) {
+            const key = this.normalizeFen(fenBefore);
+            if (!data[key]) {
+              data[key] = move.san;
+              count++;
+            }
+          }
+        } catch {
+          // Invalid move token, skip
+        }
+      }
+    }
+
+    return count;
+  }
+
+  private tokenizePgn(text: string): string[] {
+    const tokens: string[] = [];
+    let i = 0;
+
+    while (i < text.length) {
+      const ch = text[i];
+
+      if (/\s/.test(ch)) { i++; continue; }
+
+      // Brace comments
+      if (ch === '{') {
+        const end = text.indexOf('}', i + 1);
+        i = end >= 0 ? end + 1 : text.length;
+        continue;
+      }
+
+      // Line comments
+      if (ch === ';') {
+        const end = text.indexOf('\n', i + 1);
+        i = end >= 0 ? end + 1 : text.length;
+        continue;
+      }
+
+      // Variation delimiters
+      if (ch === '(' || ch === ')') {
+        tokens.push(ch);
+        i++;
+        continue;
+      }
+
+      // NAGs ($1, $2, etc.)
+      if (ch === '$') {
+        i++;
+        while (i < text.length && /\d/.test(text[i])) i++;
+        continue;
+      }
+
+      // Read a word token
+      let word = '';
+      while (i < text.length && !/[\s{}();$]/.test(text[i])) {
+        word += text[i];
+        i++;
+      }
+      if (!word) continue;
+
+      // Skip move numbers (1. or 1...) and results
+      if (/^\d+\.+$/.test(word)) continue;
+      if (['1-0', '0-1', '1/2-1/2', '*'].includes(word)) continue;
+
+      tokens.push(word);
+    }
+
+    return tokens;
   }
 
   private generatePgnMoves(nodes: RepertoireTreeNode[], forceNumber: boolean): string {
