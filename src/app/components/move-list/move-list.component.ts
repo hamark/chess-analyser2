@@ -4,6 +4,7 @@ import {
   AnalyzedMove,
   MoveQuality,
   MOVE_QUALITY_INFO,
+  OpeningDetection,
   RepertoireStatus,
 } from '../../models/analysis.model';
 
@@ -18,6 +19,7 @@ export class MoveListComponent {
   @Input() moves: AnalyzedMove[] = [];
   @Input() currentMoveIndex = -1;
   @Input() repertoireStatuses: (RepertoireStatus | null)[] = [];
+  @Input() openingDetection: OpeningDetection | null = null;
   @Output() moveSelected = new EventEmitter<number>();
   @Output() addToRepertoire = new EventEmitter<number>();
 

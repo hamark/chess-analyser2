@@ -90,6 +90,12 @@ export interface AnalyzedMove {
   cpLoss: number | null;
 }
 
+export interface OpeningDetection {
+  eco: string;
+  name: string;
+  bookMoveCount: number;
+}
+
 export interface GameAnalysis {
   moves: AnalyzedMove[];
   headers: Record<string, string>;

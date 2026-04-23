@@ -1,4 +1,11 @@
 <div class="move-list-container">
+  @if (openingDetection) {
+    <div class="opening-banner">
+      <span class="opening-icon">📖</span>
+      <span class="opening-eco">{{ openingDetection.eco }}</span>
+      <span class="opening-name">{{ openingDetection.name }}</span>
+    </div>
+  }
   <div class="move-list-header">
     <span class="col-num">#</span>
     <span class="col-move">Blancs</span>

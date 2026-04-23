@@ -15,7 +15,8 @@ import { PgnParserService, ParsedGame } from '../../services/pgn-parser.service'
 import { StockfishService } from '../../services/stockfish.service';
 import { MoveClassifierService } from '../../services/move-classifier.service';
 import { RepertoireService } from '../../services/repertoire.service';
-import { AnalyzedMove, Evaluation, MOVE_QUALITY_INFO, MoveQuality, RepertoireStatus } from '../../models/analysis.model';
+import { OpeningService } from '../../services/opening.service';
+import { AnalyzedMove, Evaluation, MOVE_QUALITY_INFO, MoveQuality, OpeningDetection, RepertoireStatus } from '../../models/analysis.model';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -48,12 +49,14 @@ export class AnalysisDashboardComponent {
   headers: Record<string, string | null> = {};
   currentMoveIndex = -1;
   repertoireStatuses: (RepertoireStatus | null)[] = [];
+  openingDetection: OpeningDetection | null = null;
 
   constructor(
     private pgnParser: PgnParserService,
     private stockfish: StockfishService,
     private moveClassifier: MoveClassifierService,
     private repertoireService: RepertoireService,
+    private openingService: OpeningService,
     private snackBar: MatSnackBar
   ) {}
 
@@ -206,6 +209,15 @@ export class AnalysisDashboardComponent {
 
     // Classify moves
     this.moves = this.moveClassifier.classifyMoves(this.moves);
+
+    // Detect opening and mark book moves
+    this.openingDetection = this.openingService.detectOpening(this.moves);
+    if (this.openingDetection) {
+      for (let i = 0; i < this.openingDetection.bookMoveCount; i++) {
+        this.moves[i] = { ...this.moves[i], quality: MoveQuality.Book };
+      }
+    }
+
     this.computeRepertoireStatuses();
     this.isAnalyzing = false;
 
@@ -249,6 +261,7 @@ export class AnalysisDashboardComponent {
     this.headers = {};
     this.currentMoveIndex = -1;
     this.repertoireStatuses = [];
+    this.openingDetection = null;
   }
 
   showRepertoireView(): void {
