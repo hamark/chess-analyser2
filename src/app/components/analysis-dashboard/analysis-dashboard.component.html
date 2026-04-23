@@ -13,7 +13,30 @@
         <h2>{{ gameTitle }}</h2>
         <p class="game-subtitle">{{ gameSubtitle }}</p>
       </div>
+
       @if (!isAnalyzing && moves.length > 0) {
+        <!-- Accuracy bars -->
+        <div class="accuracy-section">
+          @if (whiteAccuracy !== null) {
+            <div class="accuracy-item">
+              <span class="accuracy-label">♔</span>
+              <div class="accuracy-bar-bg">
+                <div class="accuracy-bar white-bar" [style.width.%]="whiteAccuracy"></div>
+              </div>
+              <span class="accuracy-value">{{ whiteAccuracy | number:'1.1-1' }}%</span>
+            </div>
+          }
+          @if (blackAccuracy !== null) {
+            <div class="accuracy-item">
+              <span class="accuracy-label">♚</span>
+              <div class="accuracy-bar-bg">
+                <div class="accuracy-bar black-bar" [style.width.%]="blackAccuracy"></div>
+              </div>
+              <span class="accuracy-value">{{ blackAccuracy | number:'1.1-1' }}%</span>
+            </div>
+          }
+        </div>
+
         <button mat-raised-button color="primary" (click)="generateReport()" class="report-btn" title="Copier le rapport de coaching">
           <mat-icon>content_copy</mat-icon>
           Rapport coaching

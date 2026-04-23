@@ -111,6 +111,62 @@ export class AnalysisDashboardComponent {
     return parts.join(' • ');
   }
 
+  private cpToWinPercent(cp: number): number {
+    return 50 + 50 * (2 / (1 + Math.exp(-0.00368208 * cp)) - 1);
+  }
+
+  private moveAccuracy(winPercentLoss: number): number {
+    const raw = 103.1668 * Math.exp(-0.04354 * winPercentLoss * winPercentLoss) - 3.1669;
+    return Math.min(100, Math.max(0, raw));
+  }
+
+  private computeAccuracy(color: 'w' | 'b'): number | null {
+    const playerMoves = this.moves.filter(m => m.color === color);
+    if (playerMoves.length === 0) return null;
+
+    let totalAccuracy = 0;
+    let count = 0;
+
+    for (const move of playerMoves) {
+      if (!move.evalBefore || !move.evalAfter) continue;
+
+      let wpBefore: number;
+      let wpAfter: number;
+
+      if (move.evalBefore.mate !== null) {
+        wpBefore = move.evalBefore.mate > 0 ? 100 : 0;
+      } else if (move.evalBefore.cp !== null) {
+        wpBefore = this.cpToWinPercent(move.evalBefore.cp);
+      } else continue;
+
+      if (move.evalAfter.mate !== null) {
+        wpAfter = move.evalAfter.mate > 0 ? 100 : 0;
+      } else if (move.evalAfter.cp !== null) {
+        wpAfter = this.cpToWinPercent(move.evalAfter.cp);
+      } else continue;
+
+      // Win% is from White's perspective; for Black, advantage = lower win%
+      const loss = color === 'w'
+        ? Math.max(0, wpBefore - wpAfter)
+        : Math.max(0, wpAfter - wpBefore);
+
+      totalAccuracy += this.moveAccuracy(loss);
+      count++;
+    }
+
+    return count > 0 ? totalAccuracy / count : null;
+  }
+
+  get whiteAccuracy(): number | null {
+    if (this.isAnalyzing || this.moves.length === 0) return null;
+    return this.computeAccuracy('w');
+  }
+
+  get blackAccuracy(): number | null {
+    if (this.isAnalyzing || this.moves.length === 0) return null;
+    return this.computeAccuracy('b');
+  }
+
   async onPgnSubmitted(pgn: string): Promise<void> {
     try {
       const parsed: ParsedGame = this.pgnParser.parsePgn(pgn);
