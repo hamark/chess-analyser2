@@ -13,55 +13,130 @@
       <mat-button-toggle value="w">♔ Blancs</mat-button-toggle>
       <mat-button-toggle value="b">♚ Noirs</mat-button-toggle>
     </mat-button-toggle-group>
-    <span class="entry-count">{{ entries.length }} position{{ entries.length > 1 ? 's' : '' }}</span>
   </div>
 
-  <div class="repertoire-content">
-    <!-- Entry list -->
-    <div class="entry-list">
-      @if (entries.length === 0) {
-        <div class="empty-state">
-          <mat-icon>menu_book</mat-icon>
-          <p>Aucun coup enregistré pour les {{ selectedColor === 'w' ? 'Blancs' : 'Noirs' }}.</p>
-          <p class="hint">Analysez une partie et cliquez sur <strong>+</strong> dans la liste des coups pour ajouter des positions.</p>
-        </div>
-      }
-      @for (entry of entries; track entry.fen; let i = $index) {
-        <div
-          class="entry-card"
-          [class.selected]="selectedIndex === i"
-          (click)="selectEntry(i)"
-        >
-          <div class="entry-info">
-            <span class="entry-move">{{ entry.san }}</span>
-            <span class="entry-fen">{{ formatFenShort(entry.fen) }}</span>
-          </div>
-          <button mat-icon-button class="delete-btn" (click)="deleteEntry($event, i)" title="Supprimer">
-            <mat-icon>delete_outline</mat-icon>
-          </button>
-        </div>
-      }
+  @if (treeRoots.length === 0) {
+    <div class="empty-state">
+      <mat-icon>menu_book</mat-icon>
+      <p>Aucun coup enregistré pour les {{ selectedColor === 'w' ? 'Blancs' : 'Noirs' }}.</p>
+      <p class="hint">Analysez une partie et cliquez sur <strong>+</strong> dans la liste des coups pour ajouter des positions.</p>
     </div>
-
-    <!-- Board preview -->
-    <div class="board-preview">
-      @if (selectedEntry) {
+  } @else {
+    <div class="repertoire-content">
+      <!-- Board -->
+      <div class="board-section">
         <app-chess-board
-          [fen]="boardFen"
-          [bestMoveUci]="arrowUci"
-          [lastMoveFrom]="null"
-          [lastMoveTo]="null"
+          [fen]="currentFen"
+          [lastMoveFrom]="lastMoveFrom"
+          [lastMoveTo]="lastMoveTo"
+          [bestMoveUci]="null"
           [moveQuality]="null"
         ></app-chess-board>
-        <div class="board-caption">
-          Coup : <strong>{{ selectedEntry.san }}</strong>
+
+        <!-- Navigation buttons -->
+        <div class="navigation">
+          <button mat-icon-button (click)="goToStart()" [disabled]="currentMoveIndex <= -1" title="Début (Home)">
+            <mat-icon>skip_previous</mat-icon>
+          </button>
+          <button mat-icon-button (click)="previousMove()" [disabled]="currentMoveIndex <= -1" title="Coup précédent (←)">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <span class="move-counter">
+            {{ currentMoveIndex + 1 }} / {{ totalMoves }}
+          </span>
+          <button mat-icon-button (click)="nextMove()" [disabled]="currentMoveIndex >= totalMoves - 1" title="Coup suivant (→)">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <button mat-icon-button (click)="goToEnd()" [disabled]="currentMoveIndex >= totalMoves - 1" title="Fin (End)">
+            <mat-icon>skip_next</mat-icon>
+          </button>
+
+          @if (currentMoveIndex >= 0 && currentPath[currentMoveIndex]?.node?.isPlayerMove) {
+            <span class="nav-separator"></span>
+            <button mat-icon-button (click)="deleteCurrentMove()" title="Supprimer ce coup du répertoire" class="delete-btn">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          }
         </div>
-      } @else {
-        <div class="no-selection">
-          <mat-icon>touch_app</mat-icon>
-          <p>Sélectionnez une position pour la visualiser</p>
+      </div>
+
+      <!-- Move list -->
+      <div class="move-list-container">
+        <div class="move-list-header">
+          <span class="col-num">#</span>
+          <span class="col-move">Blancs</span>
+          <span class="col-move">Noirs</span>
         </div>
-      }
+        <div class="move-list-body">
+          @for (pair of movePairs; track pair.number) {
+            <div class="move-row">
+              <span class="col-num">{{ pair.number }}.</span>
+
+              @if (pair.white) {
+                <span
+                  class="col-move move-cell"
+                  [class.active]="isActive(pair.whiteIdx)"
+                  [class.player-move]="pair.white.node.isPlayerMove"
+                  [class.opponent-move]="!pair.white.node.isPlayerMove"
+                  (click)="selectMove(pair.whiteIdx)"
+                >
+                  <span class="san">{{ pair.white.node.san }}</span>
+                  @if (hasVariants(pair.whiteIdx)) {
+                    <span class="variant-indicator" title="Variantes disponibles">▾</span>
+                  }
+                </span>
+              } @else {
+                <span class="col-move"></span>
+              }
+
+              @if (pair.black) {
+                <span
+                  class="col-move move-cell"
+                  [class.active]="isActive(pair.blackIdx)"
+                  [class.player-move]="pair.black.node.isPlayerMove"
+                  [class.opponent-move]="!pair.black.node.isPlayerMove"
+                  (click)="selectMove(pair.blackIdx)"
+                >
+                  <span class="san">{{ pair.black.node.san }}</span>
+                  @if (hasVariants(pair.blackIdx)) {
+                    <span class="variant-indicator" title="Variantes disponibles">▾</span>
+                  }
+                </span>
+              } @else {
+                <span class="col-move"></span>
+              }
+            </div>
+
+            <!-- Variant selector for white -->
+            @if (pair.white && hasVariants(pair.whiteIdx) && isActive(pair.whiteIdx)) {
+              <div class="variant-row">
+                <span class="variant-label">Variantes :</span>
+                @for (variant of getVariants(pair.whiteIdx); track variant.san; let vi = $index) {
+                  <span
+                    class="variant-chip"
+                    [class.variant-active]="vi === getChosenVariantIndex(pair.whiteIdx)"
+                    (click)="switchVariant(pair.whiteIdx, vi)"
+                  >{{ variant.san }}</span>
+                }
+              </div>
+            }
+
+            <!-- Variant selector for black -->
+            @if (pair.black && hasVariants(pair.blackIdx) && isActive(pair.blackIdx)) {
+              <div class="variant-row">
+                <span class="variant-label">Variantes :</span>
+                @for (variant of getVariants(pair.blackIdx); track variant.san; let vi = $index) {
+                  <span
+                    class="variant-chip"
+                    [class.variant-active]="vi === getChosenVariantIndex(pair.blackIdx)"
+                    (click)="switchVariant(pair.blackIdx, vi)"
+                  >{{ variant.san }}</span>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
     </div>
-  </div>
+  }
 </div>
