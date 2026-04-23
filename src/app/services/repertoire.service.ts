@@ -63,6 +63,88 @@ export class RepertoireService {
     return this.buildChildren(startFen, playerColor, repertoire, visited);
   }
 
+  importFromPgn(pgn: string, color: 'w' | 'b'): number {
+    const data = this.loadRepertoire(color);
+    let count = 0;
+
+    const games = this.splitPgnGames(pgn);
+    for (const gamePgn of games) {
+      const chess = new Chess();
+      try {
+        chess.loadPgn(gamePgn);
+      } catch {
+        continue;
+      }
+
+      const history = chess.history();
+      const replay = new Chess();
+      for (const san of history) {
+        const turn = replay.turn();
+        if (turn === color) {
+          const key = this.normalizeFen(replay.fen());
+          if (!data[key]) {
+            data[key] = san;
+            count++;
+          }
+        }
+        replay.move(san);
+      }
+    }
+
+    if (count > 0) {
+      this.saveRepertoire(color, data);
+    }
+    return count;
+  }
+
+  exportToPgn(color: 'w' | 'b'): string {
+    const tree = this.buildTree(color);
+    if (tree.length === 0) return '';
+
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '.');
+    const lines: string[] = [
+      `[Event "Répertoire ${color === 'w' ? 'Blancs' : 'Noirs'}"]`,
+      `[Site "Chess Analyser"]`,
+      `[Date "${date}"]`,
+      `[White "${color === 'w' ? 'Répertoire' : '?'}"]`,
+      `[Black "${color === 'b' ? 'Répertoire' : '?'}"]`,
+      `[Result "*"]`,
+      '',
+      this.generatePgnMoves(tree, true) + ' *',
+    ];
+    return lines.join('\n') + '\n';
+  }
+
+  private splitPgnGames(pgn: string): string[] {
+    const parts = pgn.split(/\n(?=\[Event\s)/);
+    return parts.map(p => p.trim()).filter(p => p.length > 0);
+  }
+
+  private generatePgnMoves(nodes: RepertoireTreeNode[], forceNumber: boolean): string {
+    if (nodes.length === 0) return '';
+
+    const parts: string[] = [];
+    const main = nodes[0];
+    parts.push(this.moveToString(main, forceNumber));
+
+    for (let i = 1; i < nodes.length; i++) {
+      parts.push('(' + this.generatePgnMoves([nodes[i]], true) + ')');
+    }
+
+    if (main.children.length > 0) {
+      parts.push(this.generatePgnMoves(main.children, nodes.length > 1));
+    }
+
+    return parts.join(' ');
+  }
+
+  private moveToString(node: RepertoireTreeNode, forceNumber: boolean): string {
+    if (node.color === 'w') {
+      return `${node.moveNumber}. ${node.san}`;
+    }
+    return forceNumber ? `${node.moveNumber}... ${node.san}` : node.san;
+  }
+
   private buildChildren(
     fen: string,
     playerColor: 'w' | 'b',

@@ -165,6 +165,43 @@ export class RepertoireViewerComponent {
     this.rebuildTree();
   }
 
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      const pgn = reader.result as string;
+      const count = this.repertoireService.importFromPgn(pgn, this.selectedColor);
+      if (count > 0) {
+        this.snackBar.open(
+          `${count} position${count > 1 ? 's' : ''} importée${count > 1 ? 's' : ''}`,
+          'OK',
+          { duration: 3000 }
+        );
+        this.rebuildTree();
+      } else {
+        this.snackBar.open('Aucune nouvelle position trouvée dans le PGN', 'OK', { duration: 3000 });
+      }
+      input.value = '';
+    };
+    reader.readAsText(file);
+  }
+
+  exportRepertoire(): void {
+    const pgn = this.repertoireService.exportToPgn(this.selectedColor);
+    if (!pgn) return;
+
+    const blob = new Blob([pgn], { type: 'application/x-chess-pgn' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `repertoire-${this.selectedColor === 'w' ? 'blancs' : 'noirs'}.pgn`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   isActive(index: number): boolean {
     return index === this.currentMoveIndex;
   }

@@ -17,6 +17,12 @@
   }
 }
 
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
 .color-toggle {
   display: flex;
   align-items: center;
@@ -44,6 +50,10 @@
     font-size: 0.85rem;
     color: #666;
     margin-top: 8px;
+  }
+
+  .import-cta {
+    margin-top: 16px;
   }
 }
 

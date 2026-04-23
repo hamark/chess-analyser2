@@ -5,7 +5,20 @@
       <mat-icon>arrow_back</mat-icon>
     </button>
     <h2>📖 Répertoire d'ouvertures</h2>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="fileInput.click()" title="Importer un fichier PGN">
+        <mat-icon>upload_file</mat-icon>
+        Importer
+      </button>
+      @if (treeRoots.length > 0) {
+        <button mat-stroked-button (click)="exportRepertoire()" title="Exporter le répertoire en PGN">
+          <mat-icon>download</mat-icon>
+          Exporter
+        </button>
+      }
+    </div>
   </div>
+  <input #fileInput type="file" accept=".pgn" hidden (change)="onFileSelected($event)">
 
   <!-- Color toggle -->
   <div class="color-toggle">
@@ -19,7 +32,11 @@
     <div class="empty-state">
       <mat-icon>menu_book</mat-icon>
       <p>Aucun coup enregistré pour les {{ selectedColor === 'w' ? 'Blancs' : 'Noirs' }}.</p>
-      <p class="hint">Analysez une partie et cliquez sur <strong>+</strong> dans la liste des coups pour ajouter des positions.</p>
+      <p class="hint">Importez un fichier PGN ou analysez une partie et cliquez sur <strong>+</strong> dans la liste des coups.</p>
+      <button mat-raised-button color="primary" (click)="fileInput.click()" class="import-cta">
+        <mat-icon>upload_file</mat-icon>
+        Importer un PGN
+      </button>
     </div>
   } @else {
     <div class="repertoire-content">
