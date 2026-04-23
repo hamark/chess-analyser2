@@ -9,6 +9,7 @@ import { PgnInputComponent } from '../pgn-input/pgn-input.component';
 import { ChessBoardComponent } from '../chess-board/chess-board.component';
 import { EvalBarComponent } from '../eval-bar/eval-bar.component';
 import { MoveListComponent } from '../move-list/move-list.component';
+import { RepertoireViewerComponent } from '../repertoire-viewer/repertoire-viewer.component';
 
 import { PgnParserService, ParsedGame } from '../../services/pgn-parser.service';
 import { StockfishService } from '../../services/stockfish.service';
@@ -29,6 +30,7 @@ import { AnalyzedMove, Evaluation, MOVE_QUALITY_INFO, MoveQuality, RepertoireSta
     ChessBoardComponent,
     EvalBarComponent,
     MoveListComponent,
+    RepertoireViewerComponent,
   ],
   templateUrl: './analysis-dashboard.component.html',
   styleUrl: './analysis-dashboard.component.scss',
@@ -36,6 +38,7 @@ import { AnalyzedMove, Evaluation, MOVE_QUALITY_INFO, MoveQuality, RepertoireSta
 export class AnalysisDashboardComponent {
   // State
   showInput = true;
+  showRepertoire = false;
   isAnalyzing = false;
   analysisProgress = 0;
 
@@ -116,6 +119,7 @@ export class AnalysisDashboardComponent {
       this.headers = parsed.headers;
       this.currentMoveIndex = -1;
       this.showInput = false;
+      this.showRepertoire = false;
       this.isAnalyzing = true;
       this.analysisProgress = 0;
 
@@ -183,11 +187,22 @@ export class AnalysisDashboardComponent {
 
   goBackToInput(): void {
     this.showInput = true;
+    this.showRepertoire = false;
     this.moves = [];
     this.fens = [];
     this.headers = {};
     this.currentMoveIndex = -1;
     this.repertoireStatuses = [];
+  }
+
+  showRepertoireView(): void {
+    this.showInput = false;
+    this.showRepertoire = true;
+  }
+
+  onRepertoireBack(): void {
+    this.showRepertoire = false;
+    this.showInput = true;
   }
 
   computeRepertoireStatuses(): void {

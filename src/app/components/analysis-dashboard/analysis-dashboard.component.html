@@ -1,5 +1,7 @@
-@if (showInput) {
-  <app-pgn-input (pgnSubmitted)="onPgnSubmitted($event)"></app-pgn-input>
+@if (showRepertoire) {
+  <app-repertoire-viewer (goBack)="onRepertoireBack()"></app-repertoire-viewer>
+} @else if (showInput) {
+  <app-pgn-input (pgnSubmitted)="onPgnSubmitted($event)" (openRepertoire)="showRepertoireView()"></app-pgn-input>
 } @else {
   <div class="dashboard">
     <!-- Header -->

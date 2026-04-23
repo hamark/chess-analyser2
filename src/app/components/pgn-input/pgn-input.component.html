@@ -1,5 +1,11 @@
 <div class="pgn-input-container">
-  <h1>♟ Analyse de Partie d'Échecs</h1>
+  <div class="title-row">
+    <h1>♟ Analyse de Partie d'Échecs</h1>
+    <button mat-stroked-button (click)="openRepertoire.emit()" class="repertoire-btn">
+      <mat-icon>menu_book</mat-icon>
+      Répertoire
+    </button>
+  </div>
   <p class="subtitle">Recherchez vos parties Chess.com ou collez un PGN manuellement</p>
 
   <!-- Chess.com search -->

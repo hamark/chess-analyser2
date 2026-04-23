@@ -6,10 +6,22 @@
   max-width: 750px;
   margin: 0 auto;
 
+  .title-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    justify-content: center;
+  }
+
   h1 {
     font-size: 2rem;
     margin-bottom: 0.25rem;
     color: #e0e0e0;
+  }
+
+  .repertoire-btn {
+    white-space: nowrap;
   }
 
   .subtitle {

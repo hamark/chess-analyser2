@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
 
+export interface RepertoireEntry {
+  fen: string;
+  san: string;
+}
+
 export interface RepertoireData {
   [fen: string]: string; // normalized FEN → SAN
 }
@@ -19,6 +24,11 @@ export class RepertoireService {
     const data = this.loadRepertoire(color);
     const key = this.normalizeFen(fen);
     return data[key] ?? null;
+  }
+
+  getAllMoves(color: 'w' | 'b'): RepertoireEntry[] {
+    const data = this.loadRepertoire(color);
+    return Object.entries(data).map(([fen, san]) => ({ fen, san }));
   }
 
   addMove(fen: string, color: 'w' | 'b', san: string): void {

@@ -28,6 +28,7 @@ import { ChesscomService, ChesscomGame } from '../../services/chesscom.service';
 })
 export class PgnInputComponent {
   @Output() pgnSubmitted = new EventEmitter<string>();
+  @Output() openRepertoire = new EventEmitter<void>();
 
   pgnText = '';
   errorMessage = '';

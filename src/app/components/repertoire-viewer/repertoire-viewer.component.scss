@@ -1,0 +1,164 @@
+.repertoire-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.repertoire-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 0;
+    color: #e0e0e0;
+    font-size: 1.5rem;
+  }
+}
+
+.color-toggle {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  .entry-count {
+    color: #888;
+    font-size: 0.9rem;
+  }
+}
+
+.repertoire-content {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.entry-list {
+  flex: 1;
+  max-height: min(640px, 85vw);
+  overflow-y: auto;
+  background: #262522;
+  border-radius: 8px;
+  border: 1px solid #3a3a3a;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #1a1a1a;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px;
+  color: #888;
+  text-align: center;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    color: #555;
+  }
+
+  p {
+    margin: 4px 0;
+  }
+
+  .hint {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 8px;
+  }
+}
+
+.entry-card {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid #2a2a2a;
+  cursor: pointer;
+  transition: background 0.15s;
+
+  &:hover {
+    background: #2d2d2d;
+  }
+
+  &.selected {
+    background: #4a6a3a;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.entry-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.entry-move {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e0e0e0;
+  margin-right: 12px;
+}
+
+.entry-fen {
+  font-size: 0.75rem;
+  color: #888;
+  font-family: monospace;
+  word-break: break-all;
+}
+
+.delete-btn {
+  flex-shrink: 0;
+  color: #888;
+  transition: color 0.15s;
+
+  &:hover {
+    color: #f44336;
+  }
+}
+
+.board-preview {
+  flex-shrink: 0;
+}
+
+.board-caption {
+  text-align: center;
+  color: #ccc;
+  margin-top: 8px;
+  font-size: 1rem;
+}
+
+.no-selection {
+  width: min(640px, 85vw);
+  height: min(640px, 85vw);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #262522;
+  border-radius: 8px;
+  border: 1px solid #3a3a3a;
+  color: #666;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+  }
+}
