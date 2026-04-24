@@ -288,13 +288,17 @@ export class RepertoireService {
     return color === 'w' ? this.STORAGE_KEY_WHITE : this.STORAGE_KEY_BLACK;
   }
 
-  private loadRepertoire(color: 'w' | 'b'): RepertoireData {
+  loadRepertoire(color: 'w' | 'b'): RepertoireData {
     try {
       const raw = localStorage.getItem(this.storageKey(color));
       return raw ? JSON.parse(raw) : {};
     } catch {
       return {};
     }
+  }
+
+  replaceRepertoire(color: 'w' | 'b', data: RepertoireData): void {
+    this.saveRepertoire(color, data);
   }
 
   private saveRepertoire(color: 'w' | 'b', data: RepertoireData): void {

@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ChessBoardComponent } from '../chess-board/chess-board.component';
 import { RepertoireService, RepertoireTreeNode } from '../../services/repertoire.service';
+import { SyncService } from '../../services/sync.service';
 
 interface PathEntry {
   node: RepertoireTreeNode;
@@ -34,13 +35,24 @@ export class RepertoireViewerComponent {
   currentPath: PathEntry[] = [];
   currentMoveIndex = -1;
 
+  syncSupported = SyncService.isSupported();
+  syncFolderName: string | null = null;
+  syncBusy = false;
+
   private readonly START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
   constructor(
     private repertoireService: RepertoireService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private syncService: SyncService
   ) {
     this.rebuildTree();
+    this.initSyncFolder();
+  }
+
+  private async initSyncFolder(): Promise<void> {
+    if (!this.syncSupported) return;
+    this.syncFolderName = await this.syncService.getFolderName();
   }
 
   get currentFen(): string {
@@ -226,6 +238,62 @@ export class RepertoireViewerComponent {
         this.goToEnd();
         break;
     }
+  }
+
+  async pickSyncFolder(): Promise<void> {
+    try {
+      this.syncFolderName = await this.syncService.pickFolder();
+      this.snackBar.open(`Dossier "${this.syncFolderName}" sélectionné`, 'OK', { duration: 3000 });
+    } catch (e: any) {
+      if (e?.name !== 'AbortError') {
+        this.snackBar.open('Impossible de sélectionner le dossier', 'OK', { duration: 3000 });
+      }
+    }
+  }
+
+  async syncToFolder(): Promise<void> {
+    this.syncBusy = true;
+    try {
+      const whiteData = this.repertoireService.loadRepertoire('w');
+      const blackData = this.repertoireService.loadRepertoire('b');
+      await this.syncService.saveRepertoire('w', whiteData);
+      await this.syncService.saveRepertoire('b', blackData);
+      this.snackBar.open('Répertoire sauvegardé dans le dossier', 'OK', { duration: 3000 });
+    } catch (e: any) {
+      this.snackBar.open(e?.message || 'Erreur de sauvegarde', 'OK', { duration: 3000 });
+    } finally {
+      this.syncBusy = false;
+    }
+  }
+
+  async syncFromFolder(): Promise<void> {
+    this.syncBusy = true;
+    try {
+      let imported = 0;
+      for (const color of ['w', 'b'] as const) {
+        const data = await this.syncService.loadRepertoire(color);
+        if (data && Object.keys(data).length > 0) {
+          this.repertoireService.replaceRepertoire(color, data);
+          imported += Object.keys(data).length;
+        }
+      }
+      if (imported > 0) {
+        this.rebuildTree();
+        this.snackBar.open(`${imported} position${imported > 1 ? 's' : ''} restaurée${imported > 1 ? 's' : ''}`, 'OK', { duration: 3000 });
+      } else {
+        this.snackBar.open('Aucun fichier de répertoire trouvé dans le dossier', 'OK', { duration: 3000 });
+      }
+    } catch (e: any) {
+      this.snackBar.open(e?.message || 'Erreur de restauration', 'OK', { duration: 3000 });
+    } finally {
+      this.syncBusy = false;
+    }
+  }
+
+  async disconnectFolder(): Promise<void> {
+    await this.syncService.disconnect();
+    this.syncFolderName = null;
+    this.snackBar.open('Dossier de synchronisation déconnecté', 'OK', { duration: 3000 });
   }
 
   private rebuildTree(): void {

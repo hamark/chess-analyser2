@@ -28,6 +28,41 @@
     </mat-button-toggle-group>
   </div>
 
+  <!-- Sync section -->
+  <div class="sync-section">
+    @if (!syncSupported) {
+      <div class="sync-unsupported">
+        <mat-icon>info</mat-icon>
+        <span>Utilisez Chrome ou Edge pour la synchronisation avec un dossier cloud.</span>
+      </div>
+    } @else if (!syncFolderName) {
+      <button mat-stroked-button (click)="pickSyncFolder()" class="sync-pick-btn">
+        <mat-icon>folder_open</mat-icon>
+        Choisir un dossier de synchronisation
+      </button>
+    } @else {
+      <div class="sync-active">
+        <div class="sync-folder-info">
+          <mat-icon>folder</mat-icon>
+          <span class="sync-folder-name">{{ syncFolderName }}</span>
+        </div>
+        <div class="sync-actions">
+          <button mat-stroked-button (click)="syncToFolder()" [disabled]="syncBusy" title="Sauvegarder le répertoire dans le dossier">
+            <mat-icon>cloud_upload</mat-icon>
+            Sauvegarder
+          </button>
+          <button mat-stroked-button (click)="syncFromFolder()" [disabled]="syncBusy" title="Restaurer le répertoire depuis le dossier">
+            <mat-icon>cloud_download</mat-icon>
+            Restaurer
+          </button>
+          <button mat-icon-button (click)="disconnectFolder()" [disabled]="syncBusy" title="Déconnecter le dossier">
+            <mat-icon>link_off</mat-icon>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
   @if (treeRoots.length === 0) {
     <div class="empty-state">
       <mat-icon>menu_book</mat-icon>
