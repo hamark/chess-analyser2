@@ -57,7 +57,13 @@ export class PgnInputComponent {
   constructor(
     private pgnParser: PgnParserService,
     public chesscom: ChesscomService
-  ) {}
+  ) {
+    const cached = this.chesscom.getCachedGames();
+    if (cached) {
+      this.chesscomUsername = cached.username;
+      this.chesscomGames = cached.games;
+    }
+  }
 
   onSubmit(): void {
     this.errorMessage = '';

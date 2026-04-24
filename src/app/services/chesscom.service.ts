@@ -33,6 +33,7 @@ interface ChesscomApiResponse {
 @Injectable({ providedIn: 'root' })
 export class ChesscomService {
   private readonly baseUrl = 'https://api.chess.com/pub/player';
+  private readonly CACHE_KEY = 'chesscom-games-cache';
 
   constructor(private http: HttpClient) {}
 
@@ -53,7 +54,12 @@ export class ChesscomService {
 
     // Sort by end_time descending and take the last N
     games.sort((a, b) => b.endTime - a.endTime);
-    return games.slice(0, count);
+    const result = games.slice(0, count);
+
+    // Cache the results
+    this.cacheGames(username, result);
+
+    return result;
   }
 
   private async fetchMonthGames(username: string, year: number, month: number): Promise<ChesscomGame[]> {
@@ -130,5 +136,24 @@ export class ChesscomService {
       case 'daily': return '📅 Quotidien';
       default: return timeClass;
     }
+  }
+
+  getCachedGames(): { username: string; games: ChesscomGame[] } | null {
+    try {
+      const raw = localStorage.getItem(this.CACHE_KEY);
+      if (!raw) return null;
+      const cached = JSON.parse(raw);
+      if (cached.username && Array.isArray(cached.games)) {
+        return { username: cached.username, games: cached.games };
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  private cacheGames(username: string, games: ChesscomGame[]): void {
+    const data = { username, games, fetchedAt: Date.now() };
+    localStorage.setItem(this.CACHE_KEY, JSON.stringify(data));
   }
 }
